@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Herramienta educativa para resolver sistemas lineales con el método de Jacobi.">
+  <title>Método de Jacobi | Métodos Numéricos</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__glow hero__glow--one"></div>
+    <div class="hero__glow hero__glow--two"></div>
+    <div class="container hero__content">
+      <p class="eyebrow">Unidad 2 · Métodos Numéricos</p>
+      <h1>Método iterativo de <span>Jacobi</span></h1>
+      <p class="hero__lead">Resuelve <strong>Ax = b</strong> y sigue cada cálculo: convergencia, despejes, iteraciones, errores y comprobación.</p>
+      <div class="hero__badges" aria-label="Características">
+        <span>Procedimiento completo</span><span>2×2 hasta 8×8</span><span>Sin caja negra</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-stack">
+    <div id="message" class="message" role="alert" aria-live="polite" hidden></div>
+
+    <section class="step-card" id="paso-1">
+      <div class="step-heading">
+        <span class="step-number">01</span>
+        <div><p class="step-kicker">Entrada</p><h2>Sistema de ecuaciones</h2></div>
+      </div>
+      <p class="section-intro">Define la matriz de coeficientes y el vector independiente. La interfaz construye el sistema <strong>AX = b</strong>.</p>
+
+      <div class="toolbar">
+        <label class="field field--compact" for="size-select">
+          <span>Tamaño n</span>
+          <select id="size-select" aria-label="Tamaño de la matriz">
+            <option value="2">2 × 2</option><option value="3">3 × 3</option>
+            <option value="4" selected>4 × 4</option><option value="5">5 × 5</option>
+            <option value="6">6 × 6</option><option value="7">7 × 7</option>
+            <option value="8">8 × 8</option>
+          </select>
+        </label>
+        <button class="button button--secondary" id="load-example" type="button">Cargar ejemplo oficial</button>
+        <button class="button button--ghost" id="clear-system" type="button">Limpiar</button>
+      </div>
+
+      <div class="equation-editor" aria-label="Editor del sistema">
+        <div class="matrix-group"><span class="matrix-label">A</span><div class="matrix-wrap"><div id="matrix-a" class="matrix-grid"></div></div></div>
+        <span class="operator">×</span>
+        <div class="matrix-group"><span class="matrix-label">x</span><div class="vector-symbol" id="vector-x-symbol"></div></div>
+        <span class="operator">=</span>
+        <div class="matrix-group"><span class="matrix-label">b</span><div class="matrix-wrap"><div id="vector-b" class="vector-grid"></div></div></div>
+      </div>
+      <div id="equations-preview" class="equations-preview"></div>
+      <div class="actions"><button class="button button--primary" id="analyze-button" type="button">Analizar sistema <span aria-hidden="true">→</span></button></div>
+    </section>
+
+    <section class="step-card result-section" id="paso-2" hidden>
+      <div class="step-heading"><span class="step-number">02</span><div><p class="step-kicker">Condición suficiente</p><h2>Análisis de convergencia</h2></div></div>
+      <div id="dominance-content" class="dominance-grid"></div>
+      <div id="dominance-conclusion" class="conclusion"></div>
+    </section>
+
+    <section class="step-card result-section" id="paso-3" hidden>
+      <div class="step-heading"><span class="step-number">03</span><div><p class="step-kicker">Preparación</p><h2>Despeje de variables</h2></div></div>
+      <div id="formula-list" class="formula-list"></div>
+      <p class="info-note"><span aria-hidden="true">i</span> Para calcular <strong>x<sup>(k+1)</sup></strong>, Jacobi utiliza exclusivamente los valores de <strong>x<sup>(k)</sup></strong>.</p>
+    </section>
+
+    <section class="step-card result-section" id="paso-4" hidden>
+      <div class="step-heading"><span class="step-number">04</span><div><p class="step-kicker">Parámetros</p><h2>Configuración</h2></div></div>
+      <div class="config-grid">
+        <div class="config-block"><h3>Vector inicial x<sup>(0)</sup></h3><div id="vector-x0" class="x0-grid"></div></div>
+        <label class="field"><span>Epsilon (adimensional)</span><input id="epsilon" type="number" value="0.0001" min="0" step="any"><small>0.0001 equivale a 0.01 %</small></label>
+        <label class="field"><span>Máximo de iteraciones</span><input id="max-iterations" type="number" value="100" min="1" step="1"></label>
+      </div>
+    </section>
+
+    <section class="step-card result-section execute-card" id="paso-5" hidden>
+      <div class="step-heading"><span class="step-number">05</span><div><p class="step-kicker">Cálculo</p><h2>Ejecutar método</h2></div></div>
+      <div class="execute-row">
+        <div><p class="criterion-label">Criterio de parada</p><p class="criterion">E <span>&lt;</span> epsilon</p><p>Se compara el error relativo máximo adimensional.</p></div>
+        <button class="button button--accent" id="solve-button" type="button">Resolver con Jacobi</button>
+      </div>
+    </section>
+
+    <section class="step-card result-section solution-section" id="paso-6" hidden>
+      <div class="step-heading"><span class="step-number">06</span><div><p class="step-kicker">Evolución</p><h2>Tabla de iteraciones</h2></div></div>
+      <p class="section-intro">E es adimensional; E % es una conversión informativa y no se compara con epsilon.</p>
+      <div class="table-scroll"><table id="iterations-table"><thead></thead><tbody></tbody></table></div>
+    </section>
+
+    <section class="step-card result-section solution-section" id="paso-7" hidden>
+      <div class="step-heading"><span class="step-number">07</span><div><p class="step-kicker">Trazabilidad</p><h2>Procedimiento iteración por iteración</h2></div></div>
+      <div id="iteration-details" class="details-list"></div>
+    </section>
+
+    <section class="step-card result-section solution-section" id="paso-8" hidden>
+      <div class="step-heading"><span class="step-number">08</span><div><p class="step-kicker">Conclusión</p><h2>Resultado final</h2></div></div>
+      <div id="final-result"></div>
+      <div id="residual-result" class="residual-card"></div>
+      <div class="actions actions--spread"><button class="button button--secondary" id="copy-procedure" type="button">Copiar procedimiento</button><span id="copy-status" class="copy-status" aria-live="polite"></span></div>
+    </section>
+  </main>
+
+  <footer><div class="container"><p>Métodos Numéricos · Método de Jacobi</p><p>Herramienta académica con trazabilidad completa</p></div></footer>
+</body>
+</html>
